@@ -12,7 +12,7 @@ Prerequisites:
 4. Train or download a YOLO model compatible with the dataset
 
 Usage:
-python live_detection.py --model path/to/model.pt --device 2
+python live_detection.py --model path/to/model.pt --source 2
 
 Press 'q' to quit.
 """
@@ -28,8 +28,14 @@ def main():
         description="Live Clash Royale Detection on MuMu")
     parser.add_argument('--model', type=str, required=True,
                         help='Path to trained YOLO model (.pt file)')
-    parser.add_argument('--device', type=int, default=2,
-                        help='Video device ID (default: 2 for /dev/video2)')
+    parser.add_argument(
+        '--source',
+        type=str,
+        default='2',
+        help='Capture source. Integer camera index or stream path/URL (default: 2)'
+    )
+    parser.add_argument('--device', type=int, default=None,
+                        help='Backward-compatible alias for --source')
     parser.add_argument('--conf', type=float, default=0.5,
                         help='Confidence threshold (default: 0.5)')
     parser.add_argument('--show-fps', action='store_true',
@@ -37,15 +43,21 @@ def main():
 
     args = parser.parse_args()
 
+    if args.device is not None:
+        args.source = str(args.device)
+
+    source = int(args.source) if args.source.isdigit() else args.source
+
     # Load YOLO model
     print(f"Loading model: {args.model}")
     model = YOLO(args.model)
 
-    # Open video capture from scrcpy stream
-    cap = cv2.VideoCapture(args.device)
+    # Open video capture from camera index or stream path/URL.
+    cap = cv2.VideoCapture(source)
     if not cap.isOpened():
-        print(f"Error: Could not open video device {args.device}")
-        print("Make sure scrcpy is running: scrcpy --v4l2-sink=/dev/video2 --no-video-playback")
+        print(f"Error: Could not open video source {args.source}")
+        print("On Linux with scrcpy v4l2: scrcpy --v4l2-sink=/dev/video2 --no-video-playback")
+        print("On Windows: use a webcam index or a virtual camera source.")
         return
 
     print("Starting live detection... Press 'q' to quit")
@@ -88,5 +100,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() < /content >
-<parameter name = "filePath" > /Users/manroopkalsi/Documents/projects/Clash-Royale-Detection-Dataset/live_detection.py
+    main()

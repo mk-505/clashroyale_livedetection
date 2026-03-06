@@ -1,3 +1,6 @@
 old*
 videos
 cards
+.venv/
+__pycache__/
+*.pyc
