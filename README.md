@@ -1,12 +1,17 @@
-# 皇室战争图像数据集
-> 本数据集不包含任何视频数据，视频数据来源于YouTube或自行录制的视频。
+# Clash Royale Live Detection Dataset for RL Agent Training
 
-中文 | [English](README_en.md)
+> This dataset does not contain any video data. Video data is sourced from YouTube or self-recorded videos.
 
-## 效果
-### 切片数据集
-本数据集收集了总共154个类别（全部切片名称请见[`label_list.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/constants/label_list.py)），总计4654个切片，用于制作生成式数据集。
-![数据切片大小分布](./asserts/segment_size.png)
+This repository is based on the original Clash Royale Image Dataset created by [wty-yy](https://github.com/wty-yy/KataCR). We extend their work by reconfiguring it for live object detection on the MuMu Android emulator and integrating it into a reinforcement learning (RL) environment.
+
+## Credits
+- **Original Dataset and KataCR Framework**: Created by [wty-yy](https://github.com/wty-yy). All rights to the original dataset, images, and core processing scripts belong to them.
+- **Our Modifications**: Live detection script for MuMu emulator integration and RL agent development.
+
+## Overview
+### Sliced Dataset
+This dataset collects a total of 154 categories (see [`label_list.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/constants/label_list.py) for all sliced names), totaling 4,654 slices, used to create generative datasets.
+![Slice size distribution](./asserts/segment_size.png)
 
 <div align="center">
     <img src="images/segment/archer/archer_1_0000007.png" width="10%"/>
@@ -42,15 +47,15 @@
     <img src="images/segment/queen-tower/queen-tower_1_0007320.png" width="10%"/>
 </div>
 
-### 生成式数据集
-使用[`generator.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/build_dataset/generator.py)生成，用于[YOLOv8](https://github.com/ultralytics/ultralytics)训练。
+### Generative Dataset
+Generated using [`generator.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/build_dataset/generator.py), for training with [YOLOv8](https://github.com/ultralytics/ultralytics).
 <div style="display: flex; flex-wrap: nowrap; justify-content: space-between;">
     <img src="asserts/generation1.jpg" alt="Generation 1" width="49%" />
     <img src="asserts/generation2.jpg" alt="Generation 2" width="49%" />
 </div>
 
-### 卡牌数据集
-本数据集只收集了2.6快速猪卡组的图片。
+### Card Dataset
+This dataset only collects images of the 2.6 Hog Cycle deck.
 <div align="center">
     <img src="images/card_classification/cannon/00030_2.jpg" width="9%"/>
     <img src="images/card_classification/fireball/00285_1.jpg" width="9%"/>
@@ -64,8 +69,8 @@
     <img src="images/card_classification/the-log/00210_3.jpg" width="9%"/>
 </div>
 
-### 圣水数据集
-本数据集只收集了5种圣水数字，用于对目标识别结果进行细分。
+### Elixir Dataset
+This dataset only collects images of 5 different elixir numbers, used for further classification of target recognition results.
 <div align="center">
     <img src="images/elixir_classification/-1/101.jpg" width="19%"/>
     <img src="images/elixir_classification/-2/11.jpg" width="19%"/>
@@ -74,36 +79,33 @@
     <img src="images/elixir_classification/1/105.jpg" width="19%"/>
 </div>
 
+## Our Modifications and Usage
+We have reconfigured this dataset for live object detection on the MuMu Android emulator. The dataset is used to train YOLOv8 models for real-time detection of Clash Royale game elements.
 
-## 介绍及使用方法
-本数据集**代码均位于[`KataCR`](https://github.com/wty-yy/KataCR)**中，
-下面提到的代码均在`KataCR`项目下，
-其中包含对**数据集标签进行转换**以及**生成式数据集的生成代码**，
-本数据集中包含如下四个子数据集：
-1. [人工标记目标识别图像数据集](/images/part2/)：
-  文件路径格式为`part2/对局视频名称/回合数`，
-  使用[Labelme](https://github.com/labelmeai/labelme)打开子文件夹，即可对边界框进行编辑。每个子文件夹中包含如下文件（`frame`为视频中的帧数）：
-    - `frame.jpg`：目标识别图像。
-    - `frame.json`：Labelme记录的边界框信息。
-    - `frame.txt`：将`json`文件转为用于YOLO模型训练的`txt`文件，使用[`label_builder.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/build_dataset/label_builder.py)生成。
-      - 每行的格式为`类别 边界框相对中心坐标(x,y) 边界框相对宽高(w,h) 从属类别 6个0`
+### Live Detection on MuMu
+- **Script**: `live_detection.py` - Performs real-time object detection on MuMu screen streams.
+- **Setup**:
+  1. Install dependencies: `pip install -r requirements.txt`
+  2. Install scrcpy: `brew install scrcpy`
+  3. Start MuMu and stream screen: `scrcpy --v4l2-sink=/dev/video2 --no-video-playback`
+  4. Run detection: `python live_detection.py --model path/to/model.pt`
 
-2. [生成式数据集](/images/segment/)：
-  - 文件路径格式`segment/cls_name/{cls_name}_{bel}_id.png`：
-    - `cls_name`为切片类别名称（全部切片名称请见[`label_list.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/constants/label_list.py)）
-    - `bel`为类别的从属派别
-    - `id`为图片编号
-  - 生成式数据集使用方法：
-    1. 配置[`constant.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/build_dataset/constant.py)中的`path_dataset`路径到`Clash-Royale-Dataset`文件夹下。
-    2. 运行[`generator.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/build_dataset/generator.py)后会在`KataCR/logs/generation`文件夹下生成目标识别图像以及带有标签的目标识别图像。（配置文件在`generator.py`最底部和[`generator_config.py`](https://github.com/wty-yy/KataCR/blob/master/katacr/build_dataset/generation_config.py)文件中）
-  - YOLOv8训练方法：请见...
+### Training YOLO Models
+1. Use the manually labeled data in `images/part2/` for direct YOLO training.
+2. Generate synthetic data using KataCR's `generator.py` for augmentation.
+3. Train with YOLOv8: `model.train(data='images/part2/ClashRoyale_detection.yaml')`
 
-3. [卡牌分类](/images/card_classification/)：
-  - 文件路径格式`card_classification/card_name/id.jpg`：
-    - `card_name`为卡牌名称
-    - `id`为图片编号
+## Future Plans
+Our goal is to integrate this detection system into a reinforcement learning environment for creating an AI agent that can play Clash Royale autonomously. This will involve:
+- Combining object detection with game state understanding
+- Implementing RL algorithms (e.g., PPO, DQN) for decision-making
+- Training the agent to make strategic moves based on detected game elements
 
-4. [圣水分类](/images/card_classification/)：
-  - 文件路径格式`elixir_classification/cls_name/id.jpg`：
-    - `cls_name`为圣水数字名称
-    - `id`为图片编号
+## Dataset Structure
+1. **Manually Labeled Images** (`images/part2/`): Real gameplay frames with YOLO annotations.
+2. **Sliced Elements** (`images/segment/`): Individual game object images for data generation.
+3. **Card Classification** (`images/card_classification/`): Card recognition images.
+4. **Elixir Classification** (`images/elixir_classification/`): Elixir value recognition.
+
+## License
+See [LICENSE](LICENSE) for details. Original dataset credits to wty-yy.
