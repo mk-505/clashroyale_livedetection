@@ -80,7 +80,7 @@ This dataset only collects images of 5 different elixir numbers, used for furthe
 </div>
 
 ## Our Modifications and Usage
-We have reconfigured this dataset for live object detection on the MuMu Android emulator. The dataset is used to train YOLOv8 models for real-time detection of Clash Royale game elements.
+We have reconfigured this dataset for live object detection on the MuMu Android emulator. The dataset is used to train YOLOv8 models for real-time detection of Clash Royale game elements, and we've extended it with a reinforcement learning environment for autonomous gameplay.
 
 ### Live Detection on MuMu
 - **Script**: `live_detection.py` - Performs real-time object detection on MuMu screen streams.
@@ -90,6 +90,18 @@ We have reconfigured this dataset for live object detection on the MuMu Android 
   3. Start MuMu and stream screen: `scrcpy --v4l2-sink=/dev/video2 --no-video-playback`
   4. Run detection: `python live_detection.py --model path/to/model.pt`
 
+### Reinforcement Learning Environment
+- **Environment**: `clash_royale_env.py` - Custom Gym environment defining state/action spaces for RL.
+- **Training**: `train_agent.py` - Script to train RL agents using PPO algorithm.
+- **State Space**: Includes elixir count, tower healths, hand cards, field units, and game phase.
+- **Action Space**: Discrete actions for playing cards at specific positions or passing turns.
+
+#### RL Setup and Training
+1. Install additional dependencies: `pip install -r requirements.txt` (includes gymnasium, torch, stable-baselines3)
+2. Train YOLO detection model first using the dataset
+3. Train RL agent: `python train_agent.py --mode train --model path/to/yolo_model.pt --timesteps 100000`
+4. Evaluate agent: `python train_agent.py --mode eval --model path/to/yolo_model.pt --rl-model ./models/clash_royale_ppo_final.zip`
+
 ### Training YOLO Models
 1. Use the manually labeled data in `images/part2/` for direct YOLO training.
 2. Generate synthetic data using KataCR's `generator.py` for augmentation.
@@ -98,8 +110,10 @@ We have reconfigured this dataset for live object detection on the MuMu Android 
 ## Future Plans
 Our goal is to integrate this detection system into a reinforcement learning environment for creating an AI agent that can play Clash Royale autonomously. This will involve:
 - Combining object detection with game state understanding
-- Implementing RL algorithms (e.g., PPO, DQN) for decision-making
-- Training the agent to make strategic moves based on detected game elements
+- Implementing RL algorithms (e.g., PPO, DQN) for decision-making ✅ **Implemented**
+- Training the agent to make strategic moves based on detected game elements ✅ **Basic framework implemented**
+- Improving state representation and reward functions
+- Adding more sophisticated game state parsing (OCR for elixir/health, better card recognition)
 
 ## Dataset Structure
 1. **Manually Labeled Images** (`images/part2/`): Real gameplay frames with YOLO annotations.
