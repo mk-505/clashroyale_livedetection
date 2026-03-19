@@ -22,7 +22,7 @@ This dataset collects a total of 154 categories (see [`label_list.py`](https://g
     <img src="images/segment/archer/archer_1_0000060.png" width="10%"/>
     <img src="images/segment/archer/archer_1_0000094.png" width="10%"/>
     <img src="images/segment/archer/archer_1_0000168.png" width="10%"/>
-    <img src="images/segment/archer/archer_1_0000176.png" width="10%"/>
+    <img src="images/segment/archer/archer_1_0000176.png" width="10%"/>3
 </div>
 <div align="center">
     <img src="images/segment/hog-rider/hog-rider_0_0000004.png" width="10%"/>
@@ -33,18 +33,18 @@ This dataset collects a total of 154 categories (see [`label_list.py`](https://g
     <img src="images/segment/hog-rider/hog-rider_0_0000054.png" width="10%"/>
     <img src="images/segment/hog-rider/hog-rider_1_0000493.png" width="10%"/>
     <img src="images/segment/hog-rider/hog-rider_1_0000557.png" width="10%"/>
-    <img src="images/segment/hog-rider/hog-rider_1_0000496.png" width="10%"/>
+    <img src="images/segment/hog-rider/hog-rider_1_000042296.png" width="10%"/>
 </div>
 <div align="center">
-    <img src="images/segment/queen-tower/queen-tower_0_0000000.png" width="10%"/>
+    <img src="images/segment/queen-tower/queen-tower_0_01000000.png" width="10%"/>
     <img src="images/segment/queen-tower/queen-tower_0_0000007.png" width="10%"/>
     <img src="images/segment/queen-tower/queen-tower_0_0006331.png" width="10%"/>
     <img src="images/segment/queen-tower/queen-tower_0_0006335.png" width="10%"/>
     <img src="images/segment/queen-tower/queen-tower_0_0006380.png" width="10%"/>
-    <img src="images/segment/queen-tower/queen-tower_1_attack_929.png" width="10%"/>
+    <img src="images/segment/queen-tower/queen-tower_1_at33tack_929.png" width="10%"/>
     <img src="images/segment/queen-tower/queen-tower_1_006330.png" width="10%"/>
     <img src="images/segment/queen-tower/queen-tower_1_0009264.png" width="10%"/>
-    <img src="images/segment/queen-tower/queen-tower_1_0007320.png" width="10%"/>
+    <img src="images/segment/queen-tower/queen-tower_1_02007320.png" width="10%"/>
 </div>
 
 ### Generative Dataset
@@ -100,6 +100,74 @@ Our goal is to integrate this detection system into a reinforcement learning env
 - Combining object detection with game state understanding
 - Implementing RL algorithms (e.g., PPO, DQN) for decision-making
 - Training the agent to make strategic moves based on detected game elements
+
+## Minimal Live RL (No Fake Env, No Offline Dataset)
+This repository now includes a minimal live PPO loop where:
+1. You manually start each match.
+2. `live_infer.py` runs YOLO on live frames, executes actions in real time, and collects transitions.
+3. At match end, transitions are saved to `episodes/episode_*.jsonl`.
+4. `train_ppo.py` trains the policy from completed live episodes between matches.
+5. You manually start the next match.
+
+### 13-Action Space
+- `0`: no-op
+- `1..12`: `(card_slot, anchor)` with `card_slot in {1,2,3,4}` and `anchor in {0,1,2}`
+- Mapping: `action = 1 + (slot-1)*3 + anchor`
+
+Execution:
+- Press key `1/2/3/4` for card slot.
+- Click one of 3 fixed anchors.
+
+### State Vector (13 dims)
+Built from live detector output plus short-term carry-forward:
+1. elixir
+2. own left tower hp
+3. own right tower hp
+4. enemy left tower hp
+5. enemy right tower hp
+6. time remaining
+7. hand card id 1
+8. hand card id 2
+9. hand card id 3
+10. hand card id 4
+11. pressure left
+12. pressure right
+13. last action
+
+### Reward
+Per step:
+- `(enemy_tower_hp_drop) - (own_tower_hp_drop)`
+
+Terminal bonus:
+- `+1` win
+- `-1` loss
+- `0` draw
+
+### Install
+```bash
+pip install -r requirements.txt
+```
+
+### Run One Match (Live Inference + Collection)
+```bash
+python live_infer.py --model path/to/model.pt --source "window:MuMu" --show
+```
+
+Optional anchor override (window-relative pixels):
+```bash
+python live_infer.py --model path/to/model.pt --source "window:MuMu" --anchors "210,520;280,430;360,520"
+```
+
+Hotkeys while running:
+- `q`: abort
+- `e`: force episode end as draw
+- `v`: force terminal win
+- `l`: force terminal loss
+
+### Train Between Matches
+```bash
+python train_ppo.py --episode-dir episodes --checkpoint checkpoints/policy_latest.pt
+```
 
 ## Dataset Structure
 1. **Manually Labeled Images** (`images/part2/`): Real gameplay frames with YOLO annotations.
