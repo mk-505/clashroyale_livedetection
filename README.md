@@ -1,87 +1,141 @@
 # ClashBotPro
 
 ## Overview
-ClashBotPro is a vision-based reinforcement learning system for Clash Royale that learns directly from live gameplay without access to a simulator or structured game state. The system combines a YOLO-based perception module with a PPO agent trained on real-time gameplay interactions.
 
-This repository contains the full pipeline for live detection, data collection, training, and evaluation.
+ClashBotPro is a **vision-based reinforcement learning system** for Clash Royale that learns directly from **live gameplay**, without access to a simulator or structured game state.
+
+The system integrates:
+- A **YOLO-based perception module** for real-time object detection
+- A **Proximal Policy Optimization (PPO)** agent trained on live interactions
+
+This repository provides the **full pipeline** for:
+- Live detection
+- Data collection
+- Training
+- Evaluation
+
+---
 
 ## Repository Structure
-```text
-src/cr_rl_live/   # core RL + runtime logic
-scripts/          # helper utilities
-data/             # dataset instructions
-models/           # model requirements
-assets/           # example visuals
+
+```
+src/cr_rl_live/   # Core RL logic and runtime system
+scripts/          # Helper utilities
+data/             # Dataset instructions
+models/           # Model checkpoints and weights
+assets/           # Example visuals and figures
 ```
 
+---
+
 ## Setup
+
+Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-Place model files in `models/`:
-- `models/yolo.pt` for the detector
-- `models/ppo.pt` for an optional trained PPO checkpoint
+Place required model files in `models/`:
+
+```
+models/yolov8.pt   # Base YOLO weights
+models/best.pt     # Fine-tuned detection model
+models/ppo.pt      # (Optional) trained PPO checkpoint
+```
+
+---
 
 ## Dataset
-This project uses a Clash Royale dataset derived from the KataCR framework.
 
-See:
-- [data/README.md](data/README.md)
+This project uses a Clash Royale dataset derived from the KataCR framework. See:
+
+```
+data/README.md
+```
+
+---
 
 ## Models
-The system requires:
-- YOLO detector weights
-- PPO policy checkpoint (optional)
+
+Required components:
+- YOLO detector weights (`best.pt` for inference)
+- PPO policy checkpoint (`ppo.pt`, optional)
 
 See:
-- [models/README.md](models/README.md)
 
-## Running The System
-1. Run live detection (YOLO only)
-```bash
-python3 live_detection.py --model models/yolo.pt --source "window:MuMu"
+```
+models/README.md
 ```
 
-2. Run random baseline agent
+---
+
+## Running the System
+
+### Quick Test (Recommended)
+
+Run live detection to verify setup:
+
 ```bash
-python3 live_random.py --model models/yolo.pt --source "window:MuMu" --episode-dir episodes_random
+python3 live_detection.py --model models/best.pt --source "window:MuMu"
 ```
 
-3. Run trained PPO agent
+### 1. Live Detection (YOLO only)
+
 ```bash
-python3 live_infer.py --model models/yolo.pt --checkpoint models/ppo.pt --source "window:MuMu" --episode-dir episodes
+python3 live_detection.py --model models/best.pt --source "window:MuMu"
 ```
 
-4. Train PPO from collected episodes
+### 2. Random Baseline Agent
+
+```bash
+python3 live_random.py --model models/best.pt --source "window:MuMu" --episode-dir episodes_random
+```
+
+### 3. Trained PPO Agent (Inference)
+
+```bash
+python3 live_infer.py --model models/best.pt --checkpoint models/ppo.pt --source "window:MuMu" --episode-dir episodes
+```
+
+### 4. Train PPO from Collected Episodes
+
 ```bash
 python3 train_ppo.py --episode-dir episodes --checkpoint models/ppo.pt
 ```
 
-5. Validate rollout data
+### 5. Validate Rollout Data
+
 ```bash
 python3 episode_sanity_check.py --episode-dir episodes --last 5
 ```
 
+---
+
 ## Runtime Notes
-- `window:MuMu` capture is intended for Windows with a visible MuMu emulator window
-- If you are not using window capture, `--source` can also be a camera index such as `2`
-- `live_infer.py` and `live_random.py` use the same 13-action live control interface
-- `live_random.py` is the no-learning random baseline
-- `live_infer.py` requires a PPO checkpoint if you want a trained policy instead of a freshly initialized one
+
+- Designed for Windows + MuMu emulator (`window:MuMu`)
+- Alternative input sources:
+  ```
+  --source 2   # webcam or capture device
+  ```
+- Real-time inference is required; performance depends on system latency
+- `live_random.py` → random baseline (no learning)
+- `live_infer.py` → trained PPO agent
+- Both use a 13-action discrete control space
+
+---
 
 ## Reproducing Results
-- Collect gameplay data by running live episodes
-- Train the PPO model using collected transitions
-- Evaluate the trained agent against human opponents
 
-Note:
-- Training is performed using live gameplay with manual interaction
-- Results may vary due to stochastic learning and real-time constraints
+1. Collect gameplay data using live episodes
+2. Train PPO on collected transitions
+3. Evaluate the trained agent against human opponents
 
-## Paper
-See the full report for details on system design, experiments, and results:  
-[INSERT PAPER LINK]
+> **Important:** Training is performed on real gameplay (no simulator). Results may vary due to stochastic learning and real-time environment noise.
+
+---
 
 ## License
-See [LICENSE](LICENSE).
+
+See `LICENSE` for details.

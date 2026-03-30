@@ -1,41 +1,30 @@
 # Models
 
 ## Overview
-This project uses two main models:
 
-1. YOLO object detection model
-2. PPO policy model
+This directory contains the models used in the ClashBotPro system.
 
-## YOLO Model
-The perception module uses a YOLO-based detector trained on Clash Royale gameplay frames.
+## Included Models
 
-To use:
-- Download or train YOLO weights
-- Place weights in this directory
+### 1. YOLO Base Model
+- File: `yolov8.pt`
+- Description: Pretrained YOLOv8 model used as the base for object detection.
 
-Example:
+### 2. Fine-Tuned Detection Model
+- File: `best.pt`
+- Description: YOLO model fine-tuned on Clash Royale gameplay data for live detection.
 
-```text
-models/yolo.pt
-```
+### 3. PPO Policy Model
+- File: `ppo.pt`
+- Description: Trained PPO policy used for decision-making during gameplay.
 
-## PPO Model
-The PPO agent is trained using live gameplay data.
+## Usage
 
-To use a trained model:
-- Place checkpoint file in this directory
-
-Example:
-
-```text
-models/ppo.pt
-```
+- `best.pt` is used for live perception (object detection)
+- `ppo.pt` is used for action selection
+- `yolov8.pt` is used as the base model for training
 
 ## Notes
-- Pretrained models are not included due to size constraints
-- Users can train models using:
-  - `train_ppo.py` for policy
-  - the YOLO training pipeline for detection
 
-## Optional
-You may provide a download link for pretrained models here if available.
+- Models are trained on a limited dataset collected through live gameplay
+- Performance may vary due to stochastic training and real-time constraints
