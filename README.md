@@ -158,6 +158,13 @@ Optional anchor override (window-relative pixels):
 python live_infer.py --model path/to/model.pt --source "window:MuMu" --anchors "210,520;280,430;360,520"
 ```
 
+### Random Baseline (Uniform Over 13 Actions)
+```bash
+python live_random.py --model path/to/model.pt --source "window:MuMu" --show
+```
+
+This runs a no-learning baseline that samples uniformly from actions `0..12` on a fixed interval and saves episodes to `episodes_random/` by default.
+
 Hotkeys while running:
 - `q`: abort
 - `e`: force episode end as draw
