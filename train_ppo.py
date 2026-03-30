@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 import argparse
+import sys
+from pathlib import Path
 
 import torch
+
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from cr_rl_live.ppo import PPOConfig, load_or_create_model, save_model, train_ppo_epoch
 from cr_rl_live.storage import iter_episode_files, load_transitions
@@ -53,4 +60,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import random
+import sys
 import time
 from collections import Counter
 from pathlib import Path
@@ -8,6 +9,11 @@ from typing import Optional
 
 import cv2
 import numpy as np
+
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from cr_rl_live.runtime import (
     MatchEndDetector,
